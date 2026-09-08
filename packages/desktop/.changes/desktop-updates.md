@@ -1,0 +1,2 @@
+- Added free signed desktop update detection with a sidebar notification and explicit download and restart controls.
+- Added active-work protection, authenticated release artifacts, bundle replacement backups and launch-failure recovery.

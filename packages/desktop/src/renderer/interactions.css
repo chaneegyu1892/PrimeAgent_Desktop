@@ -1,0 +1,155 @@
+.interaction-list {
+	display: grid;
+	gap: 12px;
+	margin: 16px 0;
+}
+.interaction-card {
+	border: 1px solid #aebd8755;
+	border-radius: 12px;
+	background: #20231c;
+	padding: 18px;
+	min-width: 0;
+}
+.interaction-meta {
+	display: flex;
+	justify-content: space-between;
+	gap: 12px;
+	color: #c4d5a6;
+	font-size: 11px;
+	margin-bottom: 12px;
+}
+.interaction-card h3 {
+	font-size: 15px;
+	margin: 0 0 12px;
+	line-height: 1.5;
+}
+.interaction-card p {
+	font-size: 12px;
+	line-height: 1.7;
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+}
+.interaction-options {
+	display: grid;
+	gap: 7px;
+}
+.interaction-options button {
+	justify-content: flex-start;
+	text-align: left;
+	white-space: normal;
+	overflow-wrap: anywhere;
+	padding: 12px;
+}
+.interaction-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+.interaction-card label {
+	display: block;
+	font-size: 12px;
+	margin-bottom: 8px;
+}
+.interaction-card textarea {
+	width: 100%;
+	background: #141610;
+	border: 1px solid #ffffff26;
+	border-radius: 6px;
+	padding: 10px;
+	resize: vertical;
+	max-height: 300px;
+	margin-bottom: 10px;
+}
+.interaction-card .interaction-cancel {
+	margin-top: 12px;
+	color: #aaa;
+	border: 0;
+	background: transparent;
+	font-size: 11px;
+}
+.interaction-card:is(.answered, .cancelled, .expired, .closed) {
+	background: #181a16;
+	border-color: #ffffff18;
+	padding: 12px 16px;
+}
+.interaction-card:is(.answered, .cancelled, .expired, .closed) .interaction-meta {
+	color: #999e91;
+	margin-bottom: 6px;
+}
+.interaction-answer {
+	color: #bdc9aa;
+	margin-bottom: 0;
+}
+.agent-notice {
+	background: #ffffff06;
+	padding: 12px 16px;
+	margin: 8px 0;
+	border-radius: 8px;
+}
+.agent-notice small {
+	color: #a9b597;
+}
+.agent-notice p {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	max-height: 160px;
+	overflow: auto;
+	font-size: 12px;
+	margin: 8px 0;
+}
+.agent-notice.error {
+	border-left: 2px solid #d49185;
+}
+.flow-status {
+	color: #aebba0;
+	font-size: 12px;
+	padding: 10px 0;
+}
+.intervention-hint {
+	color: #aeb99e;
+	font-size: 11px;
+	margin: 0 0 10px;
+}
+.attention-strip {
+	position: fixed;
+	top: 58px;
+	right: 20px;
+	z-index: 8;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	max-width: 65vw;
+}
+.attention-strip button {
+	background: #303c26;
+	border: 1px solid #a5bf7977;
+	box-shadow: 0 3px 14px #0005;
+	font-size: 11px;
+}
+.attention-dialog {
+	width: min(560px, 88vw);
+	max-height: 80vh;
+	overflow-y: auto;
+}
+.attention-dialog header {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+}
+.side-chat-messages .interaction-card {
+	padding: 12px;
+}
+.side-chat-composer select {
+	max-width: 145px;
+	font-size: 11px;
+}
+
+.interaction-history summary {
+	color: #969e8c;
+	font-size: 11px;
+	cursor: pointer;
+	padding: 8px 0;
+}
+.interaction-history .interaction-card {
+	margin: 8px 0;
+}
