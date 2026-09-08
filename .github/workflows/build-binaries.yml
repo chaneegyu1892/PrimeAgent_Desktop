@@ -23,6 +23,7 @@ permissions:
 
 jobs:
   release-context:
+    if: github.repository == 'PrimeIntellect-ai/prime-agent'
     runs-on: ubuntu-latest
     permissions:
       contents: read

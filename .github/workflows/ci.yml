@@ -15,6 +15,7 @@ permissions:
 
 jobs:
   trust:
+    if: github.repository == 'PrimeIntellect-ai/prime-agent'
     name: Contributor trust
     runs-on: ubuntu-latest
     outputs:

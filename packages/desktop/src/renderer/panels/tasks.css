@@ -1,0 +1,143 @@
+.tasks-pane {
+	overflow: auto;
+	height: 100%;
+	padding: 16px;
+	font-size: 12px;
+}
+.tasks-toolbar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+	margin-bottom: 12px;
+}
+.tasks-toolbar strong {
+	margin-right: auto;
+}
+.tasks-toolbar button {
+	font-size: 11px;
+	padding: 7px 10px;
+}
+.tasks-toolbar label {
+	display: flex;
+	gap: 6px;
+	align-items: center;
+}
+.tasks-toolbar input {
+	width: auto;
+}
+.tasks-hint {
+	color: var(--muted);
+	font-size: 11px;
+	line-height: 1.65;
+	overflow-wrap: anywhere;
+}
+.tasks-warning {
+	border-left: 2px solid #b3a974;
+	padding: 8px 10px;
+	color: #d6c995;
+	background: #27251c;
+}
+.tasks-form {
+	display: grid;
+	gap: 12px;
+	padding: 14px;
+	border: 1px solid var(--border);
+	border-radius: 10px;
+	margin-bottom: 16px;
+	background: #202020;
+}
+.tasks-form label {
+	display: grid;
+	gap: 6px;
+	min-width: 0;
+	color: #c6c6c0;
+}
+.tasks-form input,
+.tasks-form select,
+.tasks-form textarea {
+	width: 100%;
+	min-width: 0;
+	font: inherit;
+}
+.tasks-form textarea {
+	resize: none;
+	background: #181a14;
+	color: #edede7;
+	border: 1px solid var(--border);
+	border-radius: 5px;
+	padding: 9px 10px;
+	line-height: 1.6;
+}
+.task-route {
+	display: grid;
+	grid-template-columns: minmax(0, 1fr) 90px;
+	gap: 8px;
+}
+.task-list {
+	display: grid;
+	gap: 6px;
+}
+.task-row {
+	display: flex;
+	width: 100%;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 12px;
+	background: #202020;
+	text-align: left;
+	border: 1px solid transparent;
+}
+.task-row.selected {
+	border-color: #797a63;
+	background: #292a25;
+}
+.task-row > span:first-child {
+	display: grid;
+	gap: 5px;
+	min-width: 0;
+	overflow-wrap: anywhere;
+}
+.task-row small {
+	color: var(--muted);
+	font-size: 10px;
+}
+.task-status {
+	white-space: nowrap;
+	font-size: 10px;
+	color: #aeaea5;
+}
+.task-status.waiting {
+	color: #e8c67c;
+}
+.task-status.running {
+	color: #c4db94;
+}
+.task-status.failed {
+	color: #ee9d92;
+}
+.task-detail {
+	border-top: 1px solid var(--border);
+	padding-top: 16px;
+	margin-top: 20px;
+}
+.task-detail h3 {
+	margin: 0 0 8px;
+	font-size: 14px;
+}
+.task-detail pre {
+	white-space: pre-wrap;
+	overflow-wrap: anywhere;
+	font-size: 11px;
+}
+.task-dependencies {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+	margin: 12px 0;
+}
+.task-dependencies button {
+	padding: 5px 8px;
+	font-size: 11px;
+}

@@ -1,0 +1,20 @@
+- Added a local macOS desktop client with project selection, streamed conversations, steering, follow-ups, cancellation, diagnostics, and unsigned Apple Silicon packaging.
+- Improved reply readability with formatted Markdown headings, lists, tables, and code blocks during streaming.
+- Added configurable Enter-to-send shortcuts with IME protection and an automatically growing composer.
+- Refined the desktop layout around the conversation with collapsible navigation and activity, compact controls, and user message bubbles.
+- Applied Prime Intellect's official vector logos, a dark brand-inspired theme, and a high-resolution macOS app icon.
+- Added project-grouped sessions and recent conversations with direct cross-project resume.
+- Added native file attachments, image forwarding, local document references, and per-session composer drafts.
+- Added a Codex-style collapsible workspace panel with full-width and bottom docking controls and configurable shortcuts.
+- Added read-only Git reviews, bounded project file previews, persistent native zsh terminals, and independent side conversations.
+- Connected the external Aside browser through its installed CLI for tab listing, page text, and explicit HTTP(S) navigation.
+- Added a bundled agent-callable question tool and explicit select/confirm/input/editor cards with a free-text choice alternative.
+- Added automatic steering during runs, pending-question alerts for hidden side chats, lifecycle-safe replies/timeouts/cancellation, and explicit session recovery without prompt replay.
+- Displayed agent notices and editor proposals while preserving user drafts, and validated interaction flows in the packaged native app.
+- Added automatic startup, projectless general conversations, and last-conversation restoration with explicit recovery for missing or rejected sessions.
+- Added conversation search, configurable new-chat/search shortcuts, persisted text drafts, message copying, and a jump to recent messages.
+- Simplified the welcome screen and connection controls while preserving the Prime Intellect visual identity.
+
+- Added an app-owned extension library with 15 authored Skills, a pinned Python artifact toolkit, local Skill/Prime plugin imports, source previews, activation and conversation-preserving apply.
+- Added official-SDK MCP stdio/HTTP discovery and calls through an authenticated local bridge, screenshot forwarding, encrypted tokens, public-client OAuth/PKCE, provider templates and automatic Aside detection.
+- Verified actual Aside tool discovery, offline MCP calls and six generated artifact formats without paid model requests.
