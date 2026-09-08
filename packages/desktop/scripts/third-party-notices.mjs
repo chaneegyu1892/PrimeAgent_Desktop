@@ -10,7 +10,7 @@ export async function writeNotices() {
 		else dirs.push(join(root, entry.name));
 	}
 	const blocks = [
-		"Prime Desktop third-party notices\n\nThe distribution contains bundled portions of dependencies below. This inclusive list also records development tooling; listing does not imply every package executes in the app. Native node-pty and Electron retain their packaged licenses. Authored desktop Skills are MIT; external provider services and official brand assets retain their own terms.\n",
+		"Prime Desktop third-party notices\n\nThe distribution contains bundled portions of dependencies below. This inclusive list also records development tooling; listing does not imply every package executes in the app. Native node-pty and Electron retain their packaged licenses. Original desktop Skills are MIT; adapted OMO Skills and vendored code retain their stated licenses; external provider services and official brand assets retain their own terms.\n",
 	];
 	for (const dir of dirs.sort()) {
 		let pkg;
@@ -31,5 +31,12 @@ export async function writeNotices() {
 			}
 		}
 	}
+	for (const file of [
+		"vendor/omo/NOTICE.md",
+		"vendor/omo/LICENSE.md",
+		"vendor/omo/lsp/LICENSE",
+		"vendor/omo/lsp/NOTICE",
+	])
+		blocks.push(await readFile(file, "utf8"));
 	await writeFile("dist/THIRD_PARTY_NOTICES.txt", blocks.join("\n"));
 }

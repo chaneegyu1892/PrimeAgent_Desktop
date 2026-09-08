@@ -22,6 +22,12 @@ await cp("node_modules/node-pty/prebuilds/darwin-arm64", `${stage}/node_modules/
 	recursive: true,
 });
 await chmod(`${stage}/node_modules/node-pty/prebuilds/darwin-arm64/spawn-helper`, 0o755);
+for (const name of ["typescript-language-server", "typescript-lsp-runtime"]) {
+	await cp(`node_modules/${name}`, `${stage}/node_modules/${name}`, { recursive: true });
+}
+for (const name of ["napi", "napi-darwin-arm64"]) {
+	await cp(`node_modules/@ast-grep/${name}`, `${stage}/node_modules/@ast-grep/${name}`, { recursive: true });
+}
 await writeFile(
 	`${stage}/package.json`,
 	JSON.stringify({
@@ -36,7 +42,7 @@ await writeFile(
 );
 const outputs = await packager({
 	dir: stage,
-	out: "out",
+	out: process.env.PRIME_DESKTOP_PACKAGE_OUT || "out",
 	name: "Prime Desktop",
 	executableName: "Prime Desktop",
 	appBundleId: "local.prime.desktop",
@@ -45,7 +51,10 @@ const outputs = await packager({
 	arch: "arm64",
 	electronVersion: pkg.devDependencies.electron,
 	overwrite: true,
-	asar: { unpackDir: "{node_modules/node-pty,dist/extensions,dist/builtin,dist/updates}" },
+	asar: {
+		unpackDir:
+			"{node_modules/node-pty,node_modules/@ast-grep,node_modules/typescript-language-server,node_modules/typescript-lsp-runtime,dist/extensions,dist/builtin,dist/updates}",
+	},
 	prune: false,
 	...(release
 		? {

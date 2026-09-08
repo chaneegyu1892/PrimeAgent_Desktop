@@ -11,6 +11,17 @@ await cp("assets/prime-desktop-1024.png", "dist/brand/app-icon.png");
 
 await cp("builtin", "dist/builtin", { recursive: true });
 await Promise.all([
+	...["desktop-tasks", "desktop-code", "desktop-ast", "desktop-lsp", "desktop-memory"].map((name) =>
+		build({
+			entryPoints: [`src/extension/${name}.ts`],
+			external: ["@ast-grep/napi"],
+			outfile: `dist/extensions/${name}.mjs`,
+			platform: "node",
+			target: "node22",
+			format: "esm",
+			bundle: true,
+		}),
+	),
 	build({
 		entryPoints: ["src/main/updates/install-helper-entry.ts"],
 		outfile: "dist/updates/install-helper.cjs",

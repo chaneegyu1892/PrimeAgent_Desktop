@@ -1,0 +1,3 @@
+- Added persistent background agent tasks with role models, dependencies, user interaction, explicit recovery and update protection.
+- Added hash-anchored file editing, AST search, TypeScript/JavaScript language intelligence and project memory.
+- Added 17 Prime-adapted OMO Skills and default Context7 and grep.app MCP connections with preserved source notices.

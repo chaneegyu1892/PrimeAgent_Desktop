@@ -5,11 +5,24 @@ import { join, resolve } from "node:path";
 import { setTimeout as delay } from "node:timers/promises";
 import { promisify } from "node:util";
 import { _electron } from "playwright";
+import { waitForAsync } from "./smoke-wait.mjs";
 
 const run = promisify(execFile);
+const { version } = JSON.parse(await readFile("package.json", "utf8"));
+const baseline = resolve(process.env.PRIME_DESKTOP_UPDATE_BASELINE || ".smoke/update-baseline/Prime Desktop.app");
+const bundleVersion = async (app) =>
+	(
+		await run("/usr/libexec/PlistBuddy", [
+			"-c",
+			"Print :CFBundleShortVersionString",
+			join(app, "Contents/Info.plist"),
+		])
+	).stdout.trim();
+const baselineVersion = await bundleVersion(baseline);
+assert.notEqual(baselineVersion, version, "Baseline must differ from release");
 const root = await realpath(await mkdtemp(resolve(".smoke/update-")));
 const target = join(root, "Prime Desktop.app");
-await run("/usr/bin/ditto", [resolve(".smoke/update-baseline/Prime Desktop.app"), target]);
+await run("/usr/bin/ditto", [baseline, target]);
 const bin = join(root, "bin"),
 	userData = join(root, "user-data"),
 	home = join(root, "home"),
@@ -34,8 +47,8 @@ const env = {
 const executablePath = join(target, "Contents/MacOS/Prime Desktop");
 let application;
 const launch = () => _electron.launch({ executablePath, env, chromiumSandbox: true, timeout: 30_000 });
-const asset = resolve(".release/0.10.1/Prime-Desktop-0.10.1-arm64.zip");
-const manifest = resolve(".release/0.10.1/desktop-update.json");
+const asset = resolve(`.release/${version}/Prime-Desktop-${version}-arm64.zip`);
+const manifest = resolve(`.release/${version}/desktop-update.json`);
 async function installFixtureFetch(app) {
 	await app.evaluate(
 		(_, paths) => {
@@ -46,19 +59,19 @@ async function installFixtureFetch(app) {
 				const url = String(input);
 				globalThis.updateFixtureRequests.push(url);
 				if (url.endsWith("desktop-update.json")) return new Response(fs.readFileSync(paths.manifest));
-				if (url.endsWith("Prime-Desktop-0.10.1-arm64.zip"))
+				if (url.endsWith(`Prime-Desktop-${paths.version}-arm64.zip`))
 					return new Response(Readable.toWeb(fs.createReadStream(paths.asset)));
 				throw new Error("Network disabled in update smoke");
 			};
 		},
-		{ asset, manifest },
+		{ asset, manifest, version },
 	);
 }
 try {
 	application = await launch();
 	await installFixtureFetch(application);
 	let page = await application.firstWindow();
-	await page.waitForFunction(async () => {
+	await waitForAsync(page, async () => {
 		const r = await window.primeDesktop.request("app.snapshot", undefined);
 		return r.ok && r.value.connection === "connected" && !r.value.initializing;
 	});
@@ -76,20 +89,11 @@ try {
 	// Downloading then closing the app must never replace it.
 	await application.close();
 	application = undefined;
-	assert.match(
-		(
-			await run("/usr/libexec/PlistBuddy", [
-				"-c",
-				"Print :CFBundleShortVersionString",
-				join(target, "Contents/Info.plist"),
-			])
-		).stdout,
-		/0\.10\.0/,
-	);
+	assert.equal(await bundleVersion(target), baselineVersion);
 	application = await launch();
 	await installFixtureFetch(application);
 	page = await application.firstWindow();
-	await page.waitForFunction(async () => {
+	await waitForAsync(page, async () => {
 		const r = await window.primeDesktop.request("app.snapshot", undefined);
 		return r.ok && r.value.connection === "connected" && !r.value.initializing;
 	});
@@ -129,26 +133,8 @@ try {
 		await delay(300);
 	}
 	assert.equal(receipt?.success, true, "Installer must replace only the isolated test app and launch it");
-	assert.match(
-		(
-			await run("/usr/libexec/PlistBuddy", [
-				"-c",
-				"Print :CFBundleShortVersionString",
-				join(target, "Contents/Info.plist"),
-			])
-		).stdout,
-		/0\.10\.1/,
-	);
-	assert.match(
-		(
-			await run("/usr/libexec/PlistBuddy", [
-				"-c",
-				"Print :CFBundleShortVersionString",
-				join(receipt.backup, "Contents/Info.plist"),
-			])
-		).stdout,
-		/0\.10\.0/,
-	);
+	assert.equal(await bundleVersion(target), version);
+	assert.equal(await bundleVersion(receipt.backup), baselineVersion);
 	// Stop only the auto-relaunched test app by its unique executable path, then inspect restoration with Playwright.
 	await delay(2000);
 	const processes = (await run("/bin/ps", ["-axo", "pid=,command="])).stdout.split("\n");
@@ -165,7 +151,7 @@ try {
 	);
 	assert.equal(
 		(await page.evaluate(() => window.primeDesktop.request("update.status", undefined))).value.currentVersion,
-		"0.10.1",
+		version,
 	);
 	await page.locator(".message.user").filter({ hasText: "업데이트 중에도 작업 보호" }).waitFor();
 	await page.screenshot({ path: join(root, "update-restored.png") });
@@ -174,8 +160,9 @@ try {
 		JSON.stringify(
 			{
 				passed: true,
-				baseline: "0.10.0",
-				installed: "0.10.1",
+				baseline: baselineVersion,
+				installed: version,
+				appPathPreserved: true,
 				actualBundleReplacement: true,
 				mainWorkProtected: true,
 				normalQuitDoesNotInstall: true,

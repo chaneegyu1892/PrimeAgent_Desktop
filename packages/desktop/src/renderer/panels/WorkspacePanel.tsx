@@ -14,6 +14,7 @@ import {
 } from "./panel-shortcuts";
 import { ReviewPane } from "./ReviewPane";
 import { SideChatPane } from "./SideChatPane";
+import { TasksPane } from "./TasksPane";
 import { TerminalPane } from "./TerminalPane";
 
 import "./panels.css";
@@ -24,8 +25,16 @@ export const PANE_LABELS: Record<Pane, string> = {
 	browser: "브라우저",
 	files: "파일",
 	chat: "사이드 채팅",
+	tasks: "에이전트 작업",
 };
-const icons = { review: "review", terminal: "terminal", browser: "browser", files: "folder", chat: "chat" } as const;
+const icons = {
+	review: "review",
+	terminal: "terminal",
+	browser: "browser",
+	files: "folder",
+	chat: "chat",
+	tasks: "activity",
+} as const;
 export function WorkspacePanel({
 	api,
 	snapshot,
@@ -157,7 +166,7 @@ export function WorkspacePanel({
 										),
 									) ||
 									new Set(Object.values(draft).map((value) => JSON.stringify(parsePanelShortcut(value))))
-										.size < 5
+										.size < Object.keys(PANE_LABELS).length
 								) {
 									setError("겹치지 않는 단축키를 입력하세요. 예: Meta+T");
 									return;
@@ -189,7 +198,14 @@ export function WorkspacePanel({
 				</div>
 			)}
 			<div className="panel-content" hidden={!pane} key={projectPath ?? "no-project"}>
-				{!projectPath && pane !== "browser" && <p className="pane-empty">왼쪽에서 프로젝트 폴더를 열어주세요.</p>}
+				{!projectPath && pane !== "browser" && pane !== "tasks" && (
+					<p className="pane-empty">왼쪽에서 프로젝트 폴더를 열어주세요.</p>
+				)}
+				{visited.has(`${projectPath}:tasks`) && (
+					<div className="pane-host" hidden={pane !== "tasks"}>
+						<TasksPane api={api} projectPath={projectPath} insert={insert} />
+					</div>
+				)}
 				{visited.has(`${projectPath}:review`) && projectPath && (
 					<div className="pane-host" hidden={pane !== "review"}>
 						<ReviewPane api={api} projectPath={projectPath} insert={insert} />

@@ -1,0 +1,127 @@
+{
+  "repository": "https://github.com/code-yeongyu/oh-my-openagent",
+  "commit": "8bd0c35b3ba532ab0cb0df49ea71467303aa92ba",
+  "files": [
+    {
+      "source": "packages/shared-skills/skills/ast-grep/SKILL.md",
+      "destination": "builtin/skills/omo-ast-grep/upstream-reference.md",
+      "sha256": "3ed9e11e7979d4b5c4df49f97f1e9192a8d4836e47f6a87f7c3b3d4b5f947b41"
+    },
+    {
+      "source": "packages/shared-skills/skills/coding-agent-sessions/SKILL.md",
+      "destination": "builtin/skills/omo-coding-agent-sessions/upstream-reference.md",
+      "sha256": "9b00f11c1aadc51604f67376f45f33e416dc90915fd83f616a7936d5bd173d61"
+    },
+    {
+      "source": "packages/shared-skills/skills/data-scientist/SKILL.md",
+      "destination": "builtin/skills/omo-data-scientist/upstream-reference.md",
+      "sha256": "bf455e10ba7cb52304a11733a485b05945424749082318d70977978ed4cc8956"
+    },
+    {
+      "source": "packages/shared-skills/skills/debugging/SKILL.md",
+      "destination": "builtin/skills/omo-debugging/upstream-reference.md",
+      "sha256": "49fb22e0a1adb577cce543acc4e823212bd1af2e360b0e89aec041498081ed5e"
+    },
+    {
+      "source": "packages/shared-skills/skills/frontend/SKILL.md",
+      "destination": "builtin/skills/omo-frontend/upstream-reference.md",
+      "sha256": "417eebfd3ff652f639663cee8d423855d507cbffbcf53b5277800289711315ba"
+    },
+    {
+      "source": "packages/shared-skills/skills/git-master/SKILL.md",
+      "destination": "builtin/skills/omo-git-master/upstream-reference.md",
+      "sha256": "7cf754f2cc328adbd5a168a0d6717d05acfc4a847cdf8beaca49ce32ad4b68fc"
+    },
+    {
+      "source": "packages/shared-skills/skills/init-deep/SKILL.md",
+      "destination": "builtin/skills/omo-init-deep/upstream-reference.md",
+      "sha256": "291d4122134af27eeceb91e7d0cbf6029f9a31a444f49470453f55ad9b9f9405"
+    },
+    {
+      "source": "packages/shared-skills/skills/lsp-setup/SKILL.md",
+      "destination": "builtin/skills/omo-lsp-setup/upstream-reference.md",
+      "sha256": "ced2c8d02f8cd22d2ad896c619850806a95efbef40c9b66ff40fcea336e18797"
+    },
+    {
+      "source": "packages/shared-skills/skills/programming/SKILL.md",
+      "destination": "builtin/skills/omo-programming/upstream-reference.md",
+      "sha256": "a669ebf325e781389b071ab67f1a9c94d0f4d211b5b7ee35afa12fd5a916a965"
+    },
+    {
+      "source": "packages/shared-skills/skills/refactor/SKILL.md",
+      "destination": "builtin/skills/omo-refactor/upstream-reference.md",
+      "sha256": "2b48e359053a94b902fa5d53eedb0c9338887e1ab9b9d96ddb3aded5370dc2ba"
+    },
+    {
+      "source": "packages/shared-skills/skills/remove-ai-slops/SKILL.md",
+      "destination": "builtin/skills/omo-remove-ai-slops/upstream-reference.md",
+      "sha256": "ea8fbf1415d4646472c467e95d3b4a31067910c762bff8f2c27fc88385ccf559"
+    },
+    {
+      "source": "packages/shared-skills/skills/review-work/SKILL.md",
+      "destination": "builtin/skills/omo-review-work/upstream-reference.md",
+      "sha256": "929f1867876f38d3db6d9ae72a8cf303a6f28516b7ec03d80af6142e94ada6cb"
+    },
+    {
+      "source": "packages/shared-skills/skills/ultimate-browsing/SKILL.md",
+      "destination": "builtin/skills/omo-ultimate-browsing/upstream-reference.md",
+      "sha256": "49598aeae8166159e4dbe6bfcd6b18e21d30985b46625f8c7971e8538b5557b2"
+    },
+    {
+      "source": "packages/shared-skills/skills/ulw-execute/SKILL.md",
+      "destination": "builtin/skills/omo-ulw-execute/upstream-reference.md",
+      "sha256": "f0d55c69d26e2fe0abed30325e5d37b70428bccedf81d3adcc78d9ca9fa30b7c"
+    },
+    {
+      "source": "packages/shared-skills/skills/ulw-plan/SKILL.md",
+      "destination": "builtin/skills/omo-ulw-plan/upstream-reference.md",
+      "sha256": "27a0f81ccb76431beb2889ec83239d525946697aa4fb5e86071ec07af6861dbd"
+    },
+    {
+      "source": "packages/shared-skills/skills/ulw-research/SKILL.md",
+      "destination": "builtin/skills/omo-ulw-research/upstream-reference.md",
+      "sha256": "0b98e6a40b73358b524861343e2dc9a034f7ac8a667ff1b0782648ed73e3314d"
+    },
+    {
+      "source": "packages/shared-skills/skills/visual-qa/SKILL.md",
+      "destination": "builtin/skills/omo-visual-qa/upstream-reference.md",
+      "sha256": "5f9bbda5611d1f0ddf692b98c409f122a9aa75a82f5e039a9c4a462c5ef302bd"
+    },
+    {
+      "source": "packages/hashline-core/src/constants.ts",
+      "destination": "vendor/omo/hashline/constants.ts",
+      "sha256": "a09c16206f1e9dccda99786c7538eba94eadb7b99c240a8f9375e7fa02643031",
+      "modified": false
+    },
+    {
+      "source": "packages/hashline-core/src/file-text-canonicalization.ts",
+      "destination": "vendor/omo/hashline/file-text-canonicalization.ts",
+      "sha256": "2d507e4bd4bdf8d348b5823367d24f36b6702b9cee31cd6406f51c5420124dbb",
+      "modified": false
+    },
+    {
+      "source": "packages/hashline-core/src/hash-computation.ts",
+      "destination": "vendor/omo/hashline/hash-computation.ts",
+      "sha256": "faf4c01919b59375a07e0012381f1c0ddc77655bc04e4658ec444681ebc2f372",
+      "modified": false
+    },
+    {
+      "source": "packages/hashline-core/src/hashline-chunk-formatter.ts",
+      "destination": "vendor/omo/hashline/hashline-chunk-formatter.ts",
+      "sha256": "aebcd1f4c77533778eb6846ce57ffbc2af793bdd5aa3877cb6bd0993214fa8dd",
+      "modified": false
+    },
+    {
+      "source": "packages/hashline-core/src/xxhash32.ts",
+      "destination": "vendor/omo/hashline/xxhash32.ts",
+      "sha256": "02bee6d882d2ebf9fcc8d13545741e80efdff9fa099263725793382bfe7306bd",
+      "modified": false
+    },
+    {
+      "source": "packages/lsp-core/src/lsp/json-rpc-connection.ts",
+      "destination": "vendor/omo/lsp/json-rpc-connection.ts",
+      "sha256": "88d113e0e33fcf12a8ceb677ad77408d979c049ae6e86cfa5462f216542af89a",
+      "modified": true
+    }
+  ]
+}

@@ -8,7 +8,9 @@ import { promisify } from "node:util";
 const run = promisify(execFile);
 const { version } = JSON.parse(await readFile("package.json", "utf8"));
 if (!/^\d+\.\d+\.\d+$/.test(version)) throw new Error("Stable desktop releases require a stable semantic version.");
-const application = resolve("out/Prime Desktop-darwin-arm64/Prime Desktop.app");
+const application = resolve(
+	process.env.PRIME_DESKTOP_RELEASE_APP || "out/Prime Desktop-darwin-arm64/Prime Desktop.app",
+);
 const privateKey = await readFile(".release-keys/ed25519-private.pem", "utf8");
 const publicKey = createPublicKey(privateKey).export({ type: "spki", format: "pem" });
 if (!(await readFile("src/shared/update-public-key.ts", "utf8")).includes(JSON.stringify(publicKey)))

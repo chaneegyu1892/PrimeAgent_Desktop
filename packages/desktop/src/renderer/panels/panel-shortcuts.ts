@@ -1,11 +1,12 @@
 import type { EditorShortcut } from "../editor-keybindings";
-export type Pane = "review" | "terminal" | "browser" | "files" | "chat";
+export type Pane = "review" | "terminal" | "browser" | "files" | "chat" | "tasks";
 export const DEFAULT_PANEL_KEYBINDINGS: Record<Pane, string> = {
 	review: "Ctrl+Shift+G",
 	terminal: "Ctrl+`",
 	browser: "Meta+T",
 	files: "Meta+P",
 	chat: "Alt+Meta+S",
+	tasks: "Meta+Shift+J",
 };
 const key = "prime-desktop:panel-shortcuts";
 export function parsePanelShortcut(value: string): EditorShortcut | null {

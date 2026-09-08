@@ -3,6 +3,7 @@ import type { BrowserWindow, IpcMainInvokeEvent } from "electron";
 import { clipboard, dialog, ipcMain } from "electron";
 import type { CapabilityRequestName } from "../../shared/capability-contract";
 import type { PromptPayload, Result } from "../../shared/dto";
+import type { HarnessConfig, TaskSpec } from "../../shared/harness-contract";
 import type { InteractionReply } from "../../shared/interactions";
 import { REQUEST_CHANNEL, record, validateRequest } from "../../shared/ipc-contract";
 import type { PanelRequestName } from "../../shared/panel-contract";
@@ -10,6 +11,7 @@ import type { AgentManager } from "../agent/agent-manager";
 import { discoverCli, resolveCli } from "../agent/cli-discovery";
 import { AttachmentStore } from "../attachments/attachment-store";
 import type { CapabilityService } from "../capabilities/capability-service";
+import type { TaskService } from "../harness/task-service";
 import type { PanelService } from "../panels/panel-service";
 import type { ProjectManager } from "../projects/project-manager";
 import { SessionCatalog, sessionDirectory } from "../sessions/session-catalog";
@@ -56,6 +58,7 @@ export function registerIpcHandlers(
 	workspace?: WorkspaceController,
 	capabilities?: CapabilityService,
 	updates?: UpdateService,
+	tasks?: TaskService,
 ): void {
 	let lifecycleBusy = false;
 	let activeRequests = 0;
@@ -66,11 +69,13 @@ export function registerIpcHandlers(
 		manager.subscribe((snapshot) => {
 			if (!lifecycleBusy && !snapshot.initializing && !manager.busy) void workspace.remember().catch(() => {});
 		});
-	const listSessions = () =>
-		catalog.list(
-			[...store.value.recent, ...(workspace?.personal ? [workspace.personal] : [])],
-			store.value.sessionFiles,
-		);
+	const listSessions = async () =>
+		(
+			await catalog.list(
+				[...store.value.recent, ...(workspace?.personal ? [workspace.personal] : [])],
+				store.value.sessionFiles,
+			)
+		).filter((session) => !tasks?.ownsSession(session.path));
 	const rememberSession = (path: string) =>
 		store.update((settings) => ({
 			...settings,
@@ -98,6 +103,46 @@ export function registerIpcHandlers(
 				throw new Error("업데이트를 적용하고 있습니다. 재시작 후 작업을 이어가세요.");
 			activeRequests++;
 			counted = true;
+			if (name.startsWith("harness.")) {
+				if (!tasks) throw new Error("작업 관리자를 사용할 수 없습니다.");
+				const args = record(input);
+				if (name.startsWith("harness.memory")) {
+					const path = args.projectPath as string;
+					if (path !== manager.value.project?.path && !store.value.recent.some((project) => project.path === path))
+						throw new Error("앱에서 연 프로젝트를 선택하세요.");
+					if (name === "harness.memorySave")
+						await tasks.memory.save(path, {
+							key: args.key as string,
+							content: args.content as string,
+							source: args.source as string,
+						});
+					if (name === "harness.memoryForget") await tasks.memory.forget(path, args.key as string);
+					return {
+						ok: true,
+						value: await tasks.memory.list(path, name === "harness.memoryList" ? (args.query as string) : ""),
+					};
+				}
+				if (name === "harness.create") {
+					const path = args.projectPath as string;
+					if (path !== manager.value.project?.path && !store.value.recent.some((project) => project.path === path))
+						throw new Error("앱에서 연 프로젝트를 선택하세요.");
+					const { projectPath: _projectPath, ...spec } = args;
+					await tasks.create(path, spec as unknown as TaskSpec);
+				}
+				if (name === "harness.configure") await tasks.configure(input as HarnessConfig);
+				if (name === "harness.cancel") await tasks.cancel(args.id as string);
+				if (name === "harness.resume") await tasks.resume(args.id as string);
+				if (name === "harness.detail") return { ok: true, value: tasks.detail(args.id as string) };
+				if (name === "harness.message") {
+					await tasks.message(args.id as string, args.message as string);
+					return { ok: true, value: undefined };
+				}
+				if (name === "harness.respond") {
+					await tasks.respond(args.id as string, args.reply as InteractionReply);
+					return { ok: true, value: undefined };
+				}
+				return { ok: true, value: tasks.snapshot() };
+			}
 			if (name.startsWith("capability.")) {
 				if (!capabilities) throw new Error("확장 서비스를 사용할 수 없습니다.");
 				return { ok: true, value: await capabilities.handle(name as CapabilityRequestName, input, window!) };
@@ -314,6 +359,10 @@ export function registerIpcHandlers(
 					});
 					if (!selected.canceled && selected.filePaths[0]) {
 						const path = await validateSessionFile(selected.filePaths[0], cwd);
+						if (tasks?.ownsSession(path))
+							throw new Error(
+								"이 세션은 에이전트 작업에서 관리합니다. 작업 패널에서 결과를 확인하거나 재개하세요.",
+							);
 						await manager.sessionCommand({ type: "switch_session", sessionPath: path });
 						await rememberSession(path);
 					}

@@ -1,11 +1,11 @@
 import type { CapabilityRequests } from "./capability-contract";
 import type { Attachment, DesktopSnapshot, ModelInfo, PromptPayload, Result, SavedSession } from "./dto";
+import type { HarnessRequests } from "./harness-contract";
 import type { InteractionReply } from "./interactions";
-
 import type { PanelEvent, PanelRequests } from "./panel-contract";
 import type { UpdateRequests } from "./update-contract";
 
-export interface DesktopRequests extends PanelRequests, CapabilityRequests, UpdateRequests {
+export interface DesktopRequests extends PanelRequests, CapabilityRequests, UpdateRequests, HarnessRequests {
 	"app.snapshot": { input: undefined; output: DesktopSnapshot };
 	"app.copyText": { input: { text: string }; output: undefined };
 	"project.selectDirectory": { input: undefined; output: DesktopSnapshot };

@@ -122,7 +122,7 @@ process.stdin.on("data", (chunk) => {
 			);
 			continue;
 		}
-		if (cmd.type === "prompt" && cmd.message.startsWith("[interaction:")) {
+		if (cmd.type === "prompt" && cmd.message.includes("[interaction:")) {
 			streaming = true;
 			messages.push({ role: "user", content: cmd.message, timestamp: Date.now() });
 			save();
@@ -166,7 +166,7 @@ process.stdin.on("data", (chunk) => {
 		else if (cmd.type === "get_messages") data = { messages };
 		else if (cmd.type === "get_available_models") data = { models: [model] };
 		else if (cmd.type === "new_session") {
-			session = `fake-${Date.now()}`;
+			session = `fake-${process.pid}-${Date.now()}`;
 			messages = [];
 			name = undefined;
 			activeFile = undefined;

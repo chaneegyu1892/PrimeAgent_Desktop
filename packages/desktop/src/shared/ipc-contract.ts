@@ -1,11 +1,15 @@
 import { type CapabilityRequestName, validateCapabilityRequest } from "./capability-contract";
 import type { RequestName } from "./desktop-api";
+import { type HarnessRequestName, validateHarnessRequest } from "./harness-contract";
 import { validateInteractionReply } from "./interactions";
 import { type PanelRequestName, validatePanelRequest } from "./panel-contract";
 export const REQUEST_CHANNEL = "prime-desktop:request";
 export const SNAPSHOT_CHANNEL = "prime-desktop:snapshot";
 export const THINKING_LEVELS = ["off", "minimal", "low", "medium", "high", "xhigh", "max"] as const;
-const fields: Record<Exclude<RequestName, PanelRequestName | CapabilityRequestName>, readonly string[]> = {
+const fields: Record<
+	Exclude<RequestName, PanelRequestName | CapabilityRequestName | HarnessRequestName>,
+	readonly string[]
+> = {
 	"update.status": [],
 	"update.check": [],
 	"update.download": [],
@@ -46,6 +50,10 @@ export function record(value: unknown): Record<string, unknown> {
 		: {};
 }
 export function validateRequest(name: unknown, input: unknown): asserts name is RequestName {
+	if (typeof name === "string" && name.startsWith("harness.")) {
+		validateHarnessRequest(name, input);
+		return;
+	}
 	if (typeof name === "string" && name.startsWith("capability.")) {
 		validateCapabilityRequest(name, input);
 		return;
@@ -59,7 +67,7 @@ export function validateRequest(name: unknown, input: unknown): asserts name is 
 		return;
 	}
 	if (typeof name !== "string" || !Object.hasOwn(fields, name)) throw new Error("허용되지 않은 요청입니다.");
-	const expected = fields[name as Exclude<RequestName, PanelRequestName | CapabilityRequestName>];
+	const expected = fields[name as Exclude<RequestName, PanelRequestName | CapabilityRequestName | HarnessRequestName>];
 	if (expected.length === 0) {
 		if (input !== undefined) throw new Error("요청 인자가 올바르지 않습니다.");
 		return;

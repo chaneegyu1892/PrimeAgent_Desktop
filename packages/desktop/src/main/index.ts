@@ -1,5 +1,6 @@
 import { join, resolve } from "node:path";
 import { app, BrowserWindow, dialog, Menu, nativeTheme, safeStorage } from "electron";
+import { CONNECTION_TEMPLATES } from "../shared/capability-catalog";
 import { SNAPSHOT_CHANNEL } from "../shared/ipc-contract";
 import { PANEL_CHANNEL } from "../shared/panel-contract";
 import { AgentManager } from "./agent/agent-manager";
@@ -7,6 +8,8 @@ import { discoverCli, resolveCli } from "./agent/cli-discovery";
 import { RpcAgentTransport } from "./agent/rpc-agent-transport";
 import { CapabilityService } from "./capabilities/capability-service";
 import { CapabilityStore } from "./capabilities/capability-store";
+import { TaskBridge } from "./harness/task-bridge";
+import { TaskService } from "./harness/task-service";
 import { registerIpcHandlers, validateSessionFile } from "./ipc/register-ipc-handlers";
 import { PanelService } from "./panels/panel-service";
 import { ProjectManager } from "./projects/project-manager";
@@ -25,6 +28,8 @@ let manager: AgentManager | undefined;
 let panels: PanelService | undefined;
 let capabilities: CapabilityService | undefined;
 let updates: UpdateService | undefined;
+let tasks: TaskService | undefined;
+let taskBridge: TaskBridge | undefined;
 let quitReady = false;
 let quitting = false;
 const single = app.requestSingleInstanceLock();
@@ -70,6 +75,11 @@ else {
 			let capabilityError: unknown;
 			try {
 				await capabilityStore.load();
+				await capabilityStore.seedServers(
+					CONNECTION_TEMPLATES.filter((template) => ["context7", "grep-app"].includes(template.config.id)).map(
+						(template) => template.config,
+					),
+				);
 			} catch (error) {
 				capabilityError = error;
 			}
@@ -82,9 +92,9 @@ else {
 			await capabilities.startBridge();
 			if (!capabilityError) await capabilities.detectAside().catch(() => {});
 			let managerNumber = 0;
-			const createManager = () => {
+			const createManager = (taskId?: string) => {
 				const isMain = managerNumber++ === 0;
-				return new AgentManager(store, async () => {
+				const instance: AgentManager = new AgentManager(store, async () => {
 					const path = store.value.cliPath;
 					if (!path) throw new Error("설정에서 Prime Agent 실행 파일을 선택하세요.");
 					const launch = await resolveCli(path);
@@ -92,19 +102,48 @@ else {
 					if (isMain) capabilities!.markMainApplied();
 					return new RpcAgentTransport({
 						...launch,
-						env: { ...launch.env, ...capabilities!.grant() },
+						env: {
+							...launch.env,
+							...capabilities!.grant(),
+							...taskBridge?.grant(() => instance.value.project?.path, taskId),
+							PRIME_DESKTOP_LSP_SERVER: join(
+								distRoot,
+								"../node_modules/typescript-language-server/lib/cli.mjs",
+							).replace("app.asar/", "app.asar.unpacked/"),
+							PRIME_DESKTOP_LSP_RUNTIME: join(
+								distRoot,
+								"../node_modules/typescript-lsp-runtime/lib/tsserver.js",
+							).replace("app.asar/", "app.asar.unpacked/"),
+						},
 						args: [
 							...launch.args,
 							"--extension",
 							questionExtension,
 							"--extension",
 							join(distRoot, "extensions/desktop-mcp.mjs").replace("app.asar/", "app.asar.unpacked/"),
+							"--extension",
+							join(distRoot, "extensions/desktop-tasks.mjs").replace("app.asar/", "app.asar.unpacked/"),
+							"--extension",
+							join(distRoot, "extensions/desktop-code.mjs").replace("app.asar/", "app.asar.unpacked/"),
+							"--extension",
+							join(distRoot, "extensions/desktop-ast.mjs").replace("app.asar/", "app.asar.unpacked/"),
+							"--extension",
+							join(distRoot, "extensions/desktop-lsp.mjs").replace("app.asar/", "app.asar.unpacked/"),
+							"--extension",
+							join(distRoot, "extensions/desktop-memory.mjs").replace("app.asar/", "app.asar.unpacked/"),
 							...capabilityArgs,
 						],
 					});
 				});
+				return instance;
 			};
 			manager = createManager();
+			tasks = new TaskService(join(app.getPath("userData"), "harness/tasks.json"), createManager, (text) =>
+				manager?.userNotice(text),
+			);
+			await tasks.load();
+			taskBridge = new TaskBridge(tasks, () => updates?.installing ?? false);
+			await taskBridge.start();
 			if (capabilityError) manager.diagnostic("확장 설정을 읽지 못했습니다. 확장 라이브러리를 확인하세요.", "error");
 			panels = new PanelService(
 				() => manager!.value,
@@ -134,7 +173,13 @@ else {
 					await workspace.remember();
 					await window?.webContents.session.flushStorageData();
 					updates?.stop();
-					await Promise.all([manager?.shutdown(), panels?.shutdown(), capabilities?.shutdown()]);
+					await Promise.all([
+						manager?.shutdown(),
+						panels?.shutdown(),
+						capabilities?.shutdown(),
+						tasks?.shutdown(),
+						taskBridge?.shutdown(),
+					]);
 					quitReady = true;
 				},
 				() => [
@@ -145,13 +190,15 @@ else {
 						? ["에이전트 작업이나 답변 대기를 먼저 마무리하세요."]
 						: []),
 					...panels!.updateBlockers(),
+					...tasks!.blockers(),
+					...taskBridge!.blockers(),
 				],
 				!app.isPackaged || process.platform !== "darwin" || process.arch !== "arm64"
 					? "업데이트 설치는 macOS Apple Silicon 배포 앱에서 사용할 수 있습니다."
 					: undefined,
 				(error) => manager?.diagnostic(manager.redactor.error(error), "error"),
 			);
-			registerIpcHandlers(() => window, manager, projects, store, panels, workspace, capabilities, updates);
+			registerIpcHandlers(() => window, manager, projects, store, panels, workspace, capabilities, updates, tasks);
 			manager.subscribe((snapshot) => {
 				if (window && !window.isDestroyed()) window.webContents.send(SNAPSHOT_CHANNEL, snapshot);
 			});
@@ -197,7 +244,13 @@ else {
 		if (quitting) return;
 		quitting = true;
 		updates?.stop();
-		void Promise.all([manager?.shutdown(), panels?.shutdown(), capabilities?.shutdown()]).finally(() => {
+		void Promise.all([
+			manager?.shutdown(),
+			panels?.shutdown(),
+			capabilities?.shutdown(),
+			tasks?.shutdown(),
+			taskBridge?.shutdown(),
+		]).finally(() => {
 			quitReady = true;
 			app.quit();
 		});

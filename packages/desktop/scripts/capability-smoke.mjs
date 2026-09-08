@@ -5,11 +5,15 @@ export async function verifyCapabilities(app, page, root) {
 	await page.getByRole("button", { name: "확장 라이브러리", exact: true }).click();
 	const library = page.getByRole("dialog", { name: "확장 라이브러리" });
 	await library.getByRole("heading", { name: "작업을 위한 기본 Skills" }).waitFor();
-	await page.waitForFunction(() => document.querySelectorAll(".capability-library .skill-tile").length === 15);
-	assert.equal(await library.locator(".skill-tile").count(), 15);
+	await page.waitForFunction(() => document.querySelectorAll(".capability-library .skill-tile").length === 32);
+	assert.equal(await library.locator(".skill-tile").count(), 32);
 	await page.screenshot({ path: join(root, "capability-skills.png") });
 	await library.getByLabel("확장 검색").fill("코딩");
-	await library.getByRole("button", { name: "내용 보기", exact: true }).click();
+	await library
+		.locator(".skill-tile")
+		.filter({ hasText: "코딩과 구현" })
+		.getByRole("button", { name: "내용 보기", exact: true })
+		.click();
 	await library.getByRole("heading", { name: "코딩과 구현", exact: true }).first().waitFor();
 	await library
 		.locator(".skill-document")

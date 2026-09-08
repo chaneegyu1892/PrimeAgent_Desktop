@@ -36,10 +36,21 @@ const config: McpServerConfig = {
 	enabled: true,
 };
 describe("capability library", () => {
-	it("loads all 15 bundled skills, applies toggles and restores them without touching global settings", async () => {
+	it("seeds built-in MCPs once while preserving user edits and intentional removal", async () => {
 		const { root, store } = await fixture();
-		expect(store.snapshot().skills).toHaveLength(15);
-		expect((await store.launchArgs()).filter((a) => a === "--skill")).toHaveLength(15);
+		await store.saveMcp({ ...config, enabled: false });
+		await store.seedServers([config]);
+		expect(store.servers[0].enabled).toBe(false);
+		await store.removeMcp(config.id);
+		const restored = new CapabilityStore(join(root, "state"), resolve("builtin/skills"), codec);
+		await restored.load();
+		await restored.seedServers([config]);
+		expect(restored.servers).toEqual([]);
+	});
+	it("loads all 32 bundled skills, applies toggles and restores them without touching global settings", async () => {
+		const { root, store } = await fixture();
+		expect(store.snapshot().skills).toHaveLength(32);
+		expect((await store.launchArgs()).filter((a) => a === "--skill")).toHaveLength(32);
 		await store.toggle("skill", "prime-browser", false);
 		const restored = new CapabilityStore(join(root, "state"), resolve("builtin/skills"), codec);
 		await restored.load();
@@ -94,7 +105,7 @@ describe("capability library", () => {
 		expect(await store.launchArgs()).toContain("--extension");
 		await store.remove("plugin", plugin.id);
 		expect(await store.launchArgs()).not.toContain("--extension");
-		expect(store.snapshot().skills).toHaveLength(15);
+		expect(store.snapshot().skills).toHaveLength(32);
 	});
 	it("rejects escaping plugin paths, symlinks and malformed configuration, preserving corrupt files", async () => {
 		const { root, store } = await fixture();

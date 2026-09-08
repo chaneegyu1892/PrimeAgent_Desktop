@@ -170,7 +170,7 @@ describe("desktop conversation", () => {
 		await screen.findByRole("heading", { name: "fixture" });
 		fireEvent.change(screen.getByLabelText("메시지 입력"), { target: { value: "작업 중인 초안" } });
 		fireEvent.click(screen.getByRole("button", { name: "작업 패널" }));
-		expect(view.container.querySelectorAll(".panel-launch")).toHaveLength(5);
+		expect(view.container.querySelectorAll(".panel-launch")).toHaveLength(6);
 		fireEvent.click(screen.getByRole("button", { name: "패널을 아래로 이동" }));
 		expect(view.container.querySelector(".tools-bottom")).toBeTruthy();
 		fireEvent.click(screen.getByRole("button", { name: "패널 확대" }));

@@ -4,8 +4,10 @@ import { dirname, join, resolve } from "node:path";
 import electron from "electron";
 import { _electron } from "playwright";
 import { verifyCapabilities } from "./capability-smoke.mjs";
+import { verifyHarness, verifyHarnessRestored } from "./harness-smoke.mjs";
 import { verifyInteractions } from "./interaction-smoke.mjs";
 import { preparePanels, verifyPanels } from "./panel-smoke.mjs";
+import { waitForAsync } from "./smoke-wait.mjs";
 
 const packaged = process.argv.includes("--packaged");
 await mkdir(".smoke", { recursive: true });
@@ -59,7 +61,10 @@ const env = {
 	PRIME_AGENT_SESSION_DIR: sessionsDir,
 };
 const executablePath = packaged
-	? resolve("out/Prime Desktop-darwin-arm64/Prime Desktop.app/Contents/MacOS/Prime Desktop")
+	? resolve(
+			process.env.PRIME_DESKTOP_SMOKE_EXECUTABLE ||
+				"out/Prime Desktop-darwin-arm64/Prime Desktop.app/Contents/MacOS/Prime Desktop",
+		)
 	: electron;
 const errors = [];
 const launch = () =>
@@ -118,7 +123,7 @@ try {
 	assert.equal(preferences.contextIsolation, true);
 	assert.equal(preferences.nodeIntegration, false);
 	assert.equal(preferences.url, "prime-desktop://app/index.html");
-	await page.waitForFunction(async () => {
+	await waitForAsync(page, async () => {
 		const r = await window.primeDesktop.request("app.snapshot", undefined);
 		return r.ok && r.value.connection === "connected" && !r.value.initializing;
 	});
@@ -141,10 +146,14 @@ try {
 		.getByRole("navigation", { name: "최근 세션" })
 		.getByRole("button", { name: /프로젝트 없이 아이디어 정리/ });
 	await generalRow.click();
-	await page.waitForFunction(async (id) => {
-		const r = await window.primeDesktop.request("app.snapshot", undefined);
-		return r.ok && r.value.state?.sessionId === id;
-	}, general.value.state.sessionId);
+	await waitForAsync(
+		page,
+		async (id) => {
+			const r = await window.primeDesktop.request("app.snapshot", undefined);
+			return r.ok && r.value.state?.sessionId === id;
+		},
+		general.value.state.sessionId,
+	);
 	await page.waitForFunction(() => document.querySelector(".prompt-input")?.value === "일반 대화 초안");
 	assert.equal(await page.getByLabel("메시지 입력", { exact: true }).inputValue(), "일반 대화 초안");
 	await page.getByRole("button", { name: "검색 지우기" }).click();
@@ -328,6 +337,7 @@ try {
 	);
 	await verifyPanels(page, app, root, project);
 	await verifyInteractions(page, root, project);
+	const harnessState = await verifyHarness(page, root, project);
 	await input.fill("다시 열면 남는 초안");
 	const beforeRestart = await page.evaluate(() => window.primeDesktop.request("app.snapshot", undefined));
 	await app.close();
@@ -339,7 +349,7 @@ try {
 		.getByRole("button", { name: /^fixture-project/ })
 		.first()
 		.waitFor();
-	await reopened.waitForFunction(async () => {
+	await waitForAsync(reopened, async () => {
 		const r = await window.primeDesktop.request("app.snapshot", undefined);
 		return r.ok && r.value.connection === "connected" && !r.value.initializing;
 	});
@@ -352,6 +362,7 @@ try {
 	await reopened.waitForFunction(() => document.querySelector(".prompt-input")?.value === "다시 열면 남는 초안");
 	assert.equal(await reopened.getByLabel("메시지 입력", { exact: true }).inputValue(), "다시 열면 남는 초안");
 	await reopened.screenshot({ path: join(root, "restored-conversation.png") });
+	await verifyHarnessRestored(reopened, harnessState, project);
 	await reopened.getByRole("button", { name: "설정", exact: true }).click();
 	assert.equal(await reopened.getByLabel("전송 단축키", { exact: true }).inputValue(), "modifierEnter");
 	assert.deepEqual(errors, []);
@@ -363,12 +374,14 @@ try {
 		security,
 		preferences,
 		scenarios: [
-			"15 bundled Skills: browse/read/toggle/apply; local plugin import/enable and real stdio MCP discovery",
+			"32 bundled Skills: browse/read/toggle/apply; local plugin import/enable and real stdio MCP discovery",
+			"background tasks, dependency handoff, hidden user interaction, steering, cancellation, update blockers and paused restart recovery",
+			"project memory create, edit, forget and restart persistence",
 			"automatic startup without a project, general conversations, title search and configurable navigation shortcuts",
 			"general/project draft isolation, last conversation restoration and persisted text drafts",
 			"select/confirm/decline/input/editor replies, cancel, expiry and simultaneous abort",
 			"automatic steering, hidden-side-chat attention, and crash/reconnect session restore",
-			"five-tool panel, collapse, expand, bottom dock and compact layout",
+			"six-tool panel, collapse, expand, bottom dock and compact layout",
 			"project file preview and Git diff",
 			"native PTY command, retained shell, stop and restart",
 			"Aside CLI adapter with offline tab/read/open fixture",

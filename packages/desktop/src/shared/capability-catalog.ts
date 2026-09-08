@@ -16,6 +16,13 @@ const http = (id: string, name: string, url: string, oauth = false): McpServerCo
 });
 export const CONNECTION_TEMPLATES: ConnectionTemplate[] = [
 	{
+		config: http("grep-app", "grep.app", "https://mcp.grep.app"),
+		category: "개발",
+		description: "공개 저장소에서 실제 코드 패턴과 사용 예제 검색",
+		setup: "기본 익명 연결입니다. 첫 사용 시 연결하며 서비스 이용 한도가 적용됩니다.",
+		docs: "https://github.com/code-yeongyu/oh-my-openagent/blob/8bd0c35b3ba532ab0cb0df49ea71467303aa92ba/packages/omo-codex/plugin/.mcp.json",
+	},
+	{
 		config: { id: "aside", name: "Aside", transport: "stdio", command: "aside", args: ["mcp"], enabled: true },
 		category: "브라우저",
 		description: "로그인된 브라우저에서 페이지 탐색, 조작과 화면 확인",
@@ -87,6 +94,24 @@ export const CONNECTION_TEMPLATES: ConnectionTemplate[] = [
 	})),
 ];
 export const SKILL_TITLES: Record<string, string> = {
+	"omo-ast-grep": "AST 구조 검색",
+	"omo-coding-agent-sessions": "작업 기록 조사",
+	"omo-data-scientist": "심화 데이터 분석",
+	"omo-debugging": "가설 기반 진단",
+	"omo-frontend": "디자인 시스템 구현",
+	"omo-git-master": "Git 변경 관리",
+	"omo-init-deep": "프로젝트 지도",
+	"omo-lsp-setup": "언어 도구 준비",
+	"omo-programming": "언어별 구현 절차",
+	"omo-refactor": "구조적 리팩터링",
+	"omo-remove-ai-slops": "불필요한 코드 정리",
+	"omo-review-work": "독립 결과 검토",
+	"omo-ultimate-browsing": "브라우저 조사",
+	"omo-ulw-execute": "계획 실행과 인계",
+	"omo-ulw-plan": "심층 작업 계획",
+	"omo-ulw-research": "병렬 근거 조사",
+	"omo-visual-qa": "실화면 품질 검증",
+
 	"prime-desktop-workflow": "작업 계획과 협업",
 	"prime-coding": "코딩과 구현",
 	"prime-debugging": "문제 진단",

@@ -8,6 +8,7 @@
 - Main-process checks block installation while main/side conversations, queued messages, human replies, native requests, open terminals or unsent attachment selections remain. The install latch prevents new work from racing the restart.
 - The app verifies an Ed25519-signed manifest with its pinned public key, then verifies the ZIP's exact size and SHA-512. It rechecks the cached ZIP before extraction, rejects unexpected archive paths, checks symlinks, bundle ID, version and macOS code-signature integrity.
 - A separate installer waits for the current app process to exit naturally. Only an explicit approval marker authorizes replacement. It renames bundles on the same volume, keeps a hidden backup of the previous app, and restores it if replacement or launch fails. It never kills the user's agent process, asks for sudo, strips quarantine or disables Gatekeeper.
+- Replacement keeps the installed app path unchanged, so a Dock shortcut to that path continues opening the updated app. Do not replace it with a new version-specific folder.
 - The existing conversation and text drafts are saved before restart. An install result and backup path are retained in the app's `updates/install-result.json`.
 
 ## Cost and distribution
@@ -39,6 +40,8 @@ npm run package
 npm run release:artifacts
 ```
 
+If a built app is currently running, copy it to a separate staging folder and pass `PRIME_DESKTOP_RELEASE_APP="out/release-staging/Prime Desktop.app"` to `npm run release:artifacts`. Never sign or overwrite the running bundle.
+
 `release:artifacts` ad-hoc signs and verifies the app, checks bundle/package version agreement, creates the ZIP, and signs the manifest under `.release/VERSION/`. `release:init` generates `.release-keys/ed25519-private.pem` (0600) and the public key source. **Privately back up the key directory. Never commit, attach, or publish it.** Losing it prevents existing installations from trusting future releases. A key rotation needs an update signed with the old key first. This repo ignores the private key directory, runtime data, test data and release output.
 
 Publish the versioned ZIP first, verify it is available, then advance the small `desktop-stable` channel manifest. Do not overwrite an existing versioned ZIP. Keep this channel separate from upstream CLI tags/workflows. Release commands use a reviewed commit pushed to the `desktop` fork:
@@ -48,6 +51,8 @@ gh release create desktop-vVERSION '.release/VERSION/Prime-Desktop-VERSION-arm64
 # Create desktop-stable once, then replace only its channel metadata:
 gh release upload desktop-stable .release/VERSION/desktop-update.json --repo chaneegyu1892/PrimeAgent_Desktop --clobber
 ```
+
+The fork runs `.github/workflows/desktop-ci.yml` for Desktop build, formatting/types and tests. Original CLI CI and release jobs are restricted to the upstream repository. Desktop CI does not publish or install updates.
 
 A future CI can use the same scripts with the release key in a GitHub Actions secret. The current flow deliberately requires the maintainer to publish a release; arbitrary pushes do not publish binaries. Optional paid signing remains available in package.mjs with PRIME_DESKTOP_RELEASE=1 and keychain-based Developer ID/notary settings, but is not needed for this updater.
 

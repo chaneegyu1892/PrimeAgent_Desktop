@@ -3,6 +3,7 @@ import { execFile } from "node:child_process";
 import { chmod, mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { promisify } from "node:util";
+import { waitForAsync } from "./smoke-wait.mjs";
 
 export async function preparePanels(root, project) {
 	const git = (...args) => promisify(execFile)("/usr/bin/git", ["-C", project, ...args]);
@@ -45,7 +46,7 @@ export async function verifyPanels(page, app, root, project) {
 	const before = await request("app.snapshot", undefined);
 	await page.getByRole("button", { name: "작업 패널", exact: true }).click();
 	const panel = page.getByRole("complementary", { name: "작업 패널", exact: true });
-	assert.equal(await panel.locator(".panel-launch").count(), 5);
+	assert.equal(await panel.locator(".panel-launch").count(), 6);
 	await page.screenshot({ path: join(root, "workspace-panel.png") });
 	await panel.getByRole("button", { name: "패널을 아래로 이동" }).click();
 	assert.equal(await page.locator(".tools-bottom").count(), 1);
@@ -79,10 +80,14 @@ export async function verifyPanels(page, app, root, project) {
 	await panel.locator(".xterm-helper-textarea").focus();
 	await page.keyboard.type("printf '\\nPANEL_PTY_OK:%s\\n' \"$PWD\"");
 	await page.keyboard.press("Enter");
-	await page.waitForFunction(async (projectPath) => {
-		const result = await window.primeDesktop.request("panel.terminalOpen", { projectPath });
-		return result.ok && result.value.output.includes(`PANEL_PTY_OK:${projectPath}`);
-	}, project);
+	await waitForAsync(
+		page,
+		async (projectPath) => {
+			const result = await window.primeDesktop.request("panel.terminalOpen", { projectPath });
+			return result.ok && result.value.output.includes(`PANEL_PTY_OK:${projectPath}`);
+		},
+		project,
+	);
 	const terminal = await request("panel.terminalOpen", { projectPath: project });
 	await panel.getByRole("button", { name: "작업 패널 닫기" }).click();
 	await page.getByRole("button", { name: "작업 패널", exact: true }).click();

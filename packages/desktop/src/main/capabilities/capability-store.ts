@@ -20,6 +20,7 @@ interface LocalPlugin extends PluginEntry {
 	extensionPaths: string[];
 }
 interface Config {
+	seededServers?: string[];
 	disabled: string[];
 	skills: LocalSkill[];
 	plugins: LocalPlugin[];
@@ -103,6 +104,8 @@ export class CapabilityStore {
 				!Array.isArray(config.plugins) ||
 				!Array.isArray(config.servers) ||
 				!config.secrets ||
+				(config.seededServers !== undefined &&
+					(!Array.isArray(config.seededServers) || config.seededServers.some((id) => typeof id !== "string"))) ||
 				config.servers.length > 50
 			)
 				throw new Error("invalid config");
@@ -230,6 +233,19 @@ export class CapabilityStore {
 				const plugin = c.plugins.find((p) => p.id === id);
 				if (!plugin) throw new Error("플러그인을 찾지 못했습니다.");
 				plugin.enabled = enabled;
+			}
+		});
+	}
+	async seedServers(servers: McpServerConfig[]) {
+		const pending = servers.filter((server) => !this.config.seededServers?.includes(server.id));
+		if (!pending.length) return;
+		pending.forEach(validateMcpConfig);
+		await this.change((config) => {
+			config.seededServers ??= [];
+			for (const server of pending) {
+				if (!config.servers.some((existing) => existing.id === server.id) && config.servers.length < 50)
+					config.servers.push(server);
+				config.seededServers.push(server.id);
 			}
 		});
 	}
