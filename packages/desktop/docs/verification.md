@@ -17,6 +17,8 @@
 
 무료 서명은 Apple 공증을 의미하지 않습니다. 첫 설치의 macOS 확인, 쓰기 가능한 앱 폴더, 배포 키의 비공개 백업이 필요합니다. [업데이트 배포·복구 안내](updates.md).
 
+배포 확인: 사용자 포크의 `codex/prime-desktop-mvp`에 데스크톱 소스를 푸시했고, [0.10.1 앱](https://github.com/chaneegyu1892/PrimeAgent_Desktop/releases/tag/desktop-v0.10.1)과 [업데이트 채널](https://github.com/chaneegyu1892/PrimeAgent_Desktop/releases/tag/desktop-stable)을 공개했습니다. 업로드된 ZIP의 GitHub SHA-256이 로컬 검증 파일과 일치합니다. 최종 앱의 실제 `update.check`가 공개 GitHub 채널을 읽고 서명을 검증하여 0.10.1을 최신 버전으로 판정했습니다. [실제 공개 채널 확인](../.smoke/live-update-cea2MI/report.json). CLI 원본 저장소와 main 브랜치는 수정하지 않았습니다.
+
 ## 후속 업데이트: 확장 라이브러리와 에이전트 도구
 
 2026-09-08 [구현 계획](capability-plan.md), [공식 자료 조사](capability-research.md)에 따라 확장 기능을 추가했습니다.
